@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Imposter Word Game</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        margin: 0;
+        background: #111827;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 500px;
+        background: #1f2937;
+        border-radius: 20px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h1 {
+        margin-top: 0;
+        font-size: 2rem;
+    }
+
+    .info {
+        font-size: 1.2rem;
+        margin: 20px 0;
+    }
+
+    .word {
+        min-height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 20px 0;
+        padding: 20px;
+        border-radius: 15px;
+        background: #111827;
+        word-wrap: break-word;
+    }
+
+    button {
+        width: 100%;
+        padding: 15px;
+        margin-top: 12px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        cursor: pointer;
+        background: #2563eb;
+        color: white;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+    }
+
+    input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 10px;
+        border: none;
+        margin-top: 10px;
+        font-size: 1rem;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎭 Imposter Game</h1>
+
+    <!-- Setup Screen -->
+    <div id="setupScreen">
+        <p>Enter number of players</p>
+        <input type="number" id="playerCount" min="3" max="20" value="4" />
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="hidden">
+
+        <div class="info" id="infoText"></div>
+
+        <div class="word" id="wordBox"></div>
+
+        <button id="mainButton" onclick="handleButton()">
+            Show My Word
+        </button>
+
+        <button onclick="revealImposter()">
+            Reveal Imposter
+        </button>
+
+        <button onclick="newGame()">
+            New Game
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+const WORDS = [
+    "Apple", "Ball", "Cat", "Dog", "Egg", "Fish", "Goat", "Hat", "Ice", "Jam",
+    "Kite", "Lion", "Moon", "Nest", "Orange", "Pig", "Queen", "Rain", "Sun", "Tree",
+    "Umbrella", "Van", "Whale", "Box", "Yak", "Zoo", "Ant", "Bee", "Cake", "Duck",
+    "Elf", "Frog", "Gift", "Horse", "Ink", "Juice", "Key", "Leaf", "Milk", "Nose",
+    "Owl", "Panda", "Quilt", "Ring", "Sock", "Train", "Unicorn", "Vase", "Wolf", "Xray",
+    "Yarn", "Zebra", "Boat", "Cloud", "Drum", "Earth", "Feather", "Garden", "Hammer", "Island",
+    "Jelly", "Koala", "Ladder", "Monkey", "Notebook", "Ocean", "Pencil", "Rabbit", "Star", "Tiger",
+    "Violin", "Window", "Yellow", "Zip", "Bread", "Cherry", "Dolphin", "Elephant", "Flower", "Grapes",
+    "Helicopter", "Igloo", "Jacket", "Kitchen", "Lamp", "Mountain", "Noodle", "Octopus", "Popcorn", "Rocket",
+    "Snow", "Turtle", "Volcano", "Watermelon", "Xylophone", "YoYo", "Airplane", "Butterfly", "Cookie", "Diamond",
+    "Engine", "Fire", "Guitar", "House", "Jungle", "Kangaroo", "Lemon", "Mirror", "Necklace", "Parrot",
+    "Rainbow", "Sandwich", "Toothbrush", "Vacation", "Wagon", "Yogurt", "Acorn", "Bubble", "Candle", "Donut"
+];
+
+let numPlayers = 0;
+let currentPlayer = 1;
+let imposter = 1;
+let secretWord = "";
+let showingWord = false;
+
+const setupScreen = document.getElementById("setupScreen");
+const gameScreen = document.getElementById("gameScreen");
+
+const infoText = document.getElementById("infoText");
+const wordBox = document.getElementById("wordBox");
+const mainButton = document.getElementById("mainButton");
+
+function randomChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function startGame() {
+    numPlayers = parseInt(document.getElementById("playerCount").value);
+
+    if (numPlayers < 3 || numPlayers > 20) {
+        alert("Player count must be between 3 and 20");
+        return;
+    }
+
+    setupScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+
+    setupNewGame();
+}
+
+function setupNewGame() {
+    secretWord = randomChoice(WORDS);
+    imposter = Math.floor(Math.random() * numPlayers) + 1;
+
+    currentPlayer = 1;
+    showingWord = false;
+
+    infoText.innerText = `Pass the phone to Player ${currentPlayer}`;
+    wordBox.innerText = "";
+    wordBox.style.color = "white";
+
+    mainButton.disabled = false;
+    mainButton.innerText = "Show My Word";
+}
+
+function handleButton() {
+
+    if (!showingWord) {
+
+        if (currentPlayer === imposter) {
+            wordBox.innerText = "YOU ARE THE IMPOSTER!";
+            wordBox.style.color = "#ef4444";
+        } else {
+            wordBox.innerText = `The word is:\n${secretWord}`;
+            wordBox.style.color = "#22c55e";
+        }
+
+        infoText.innerText = `Player ${currentPlayer}`;
+        mainButton.innerText = "Hide / Next Player";
+
+        showingWord = true;
+
+    } else {
+
+        showingWord = false;
+        wordBox.innerText = "";
+
+        currentPlayer++;
+
+        if (currentPlayer > numPlayers) {
+
+            infoText.innerText = "Everyone has seen their role!";
+            wordBox.innerText = "Start discussing 👀";
+
+            mainButton.disabled = true;
+
+            return;
+        }
+
+        infoText.innerText = `Pass the phone to Player ${currentPlayer}`;
+        mainButton.innerText = "Show My Word";
+    }
+}
+
+function revealImposter() {
+    alert(`The imposter was Player ${imposter}`);
+}
+
+function newGame() {
+    setupNewGame();
+}
+</script>
+
+</body>
+</html>
